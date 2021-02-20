@@ -1,9 +1,7 @@
 package inventario;
 
-import java.util.ArrayList;
-
+import java.util.Set;
 import org.openqa.selenium.By;
-import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.firefox.FirefoxDriver;
@@ -25,9 +23,11 @@ public class Inventario {
 	@Test
 	public void login() {
 		//Login form inputs and button
+		WebDriverWait wait = new WebDriverWait(driver,1000);
+
 		WebElement usernameInput = driver.findElement(By.id("login"));
 		WebElement passwordInput = driver.findElement(By.id("password"));
-		WebElement btnLogin = driver.findElement(By.id("submit"));
+		WebElement btnLogin =  wait.until(ExpectedConditions.elementToBeClickable(By.id("submit")));
 		
 		usernameInput.sendKeys("paul");
 		passwordInput.sendKeys("canastos123");
@@ -35,17 +35,37 @@ public class Inventario {
 	}
 	
 	@Test
-	public void update() throws InterruptedException {
-		//Go to inventario
-		driver.navigate().to(url+"home/inventario.php");
+	public void openNewTab()  throws InterruptedException{
 		
-		Thread.sleep(6000);
+		String firstWindow = driver.getWindowHandle();
+		driver.findElement(By.xpath("/html/body/div[3]/div[2]/div[2]/div[2]/div[4]/a")).click();
 
+		Set<String> secondWindow = driver.getWindowHandles();
+
+		for (String handle : secondWindow) {
+			if (!handle.equals(firstWindow)) {
+				driver.switchTo().window(handle);
+			}
+		}
+		Thread.sleep(2000);
+
+	}
+	
+	@Test
+	public void searchByCod() throws InterruptedException {
+		driver.findElement(By.id("cipl")).sendKeys("05028");
+		WebDriverWait wait = new WebDriverWait(driver,1000);
+		WebElement btnSubmit = wait.until(ExpectedConditions.elementToBeClickable(By.name("submit")));
+		btnSubmit.click();
+		
 		WebElement btnEditar = driver.findElement(By.xpath("//*[@id=\"MulticontentTable\"]/tbody/tr[1]/td[14]/a[1]"));
 		btnEditar.click();
-		
 		Thread.sleep(6000);
-		
+
+	}
+	
+	@Test
+	public void update() throws InterruptedException {
 		WebElement stockInput = driver.findElement(By.id("stock"));
 		WebElement stock2Input = driver.findElement(By.id("stock2"));
 		WebElement stock3Input = driver.findElement(By.id("stock3"));
@@ -69,37 +89,7 @@ public class Inventario {
 		btnGuardar.click();
 		driver.navigate().refresh();
 	}
-	@Test
-	public void searchByCod() throws InterruptedException {
-		driver.navigate().to(url+"home/inventario.php");
-		//Thread.sleep(6000);
-		
-		driver.findElement(By.id("cipl")).sendKeys("05028");
-		WebDriverWait wait = new WebDriverWait(driver,1000);
-		WebElement btnSubmit = wait.until(ExpectedConditions.elementToBeClickable(By.name("submit")));
-		btnSubmit.click();
-		Thread.sleep(6000);
-
-	}
 	
-	@Test
-	public void openNewTab()  throws InterruptedException{
-		WebElement usernameInput = driver.findElement(By.id("login"));
-		WebElement passwordInput = driver.findElement(By.id("password"));
-		WebElement btnLogin = driver.findElement(By.id("submit"));
-		
-		usernameInput.sendKeys("paul");
-		passwordInput.sendKeys("canastos123");
-		btnLogin.click();
-		
-		driver.navigate().to(url+"home/");
-		Thread.sleep(6000);
-		driver.findElement(By.cssSelector("body")).sendKeys(Keys.CONTROL +"t");
-	    ArrayList<String> tabs = new ArrayList<String> (driver.getWindowHandles());
-	    driver.switchTo().window(tabs.get(1)); //switches to new tab
-	    driver.get("https://www.facebook.com");
-		Thread.sleep(6000);
-	}
 	
 	@AfterTest
 	public void finishTest() {
